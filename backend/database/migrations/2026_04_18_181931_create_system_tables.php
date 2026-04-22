@@ -15,11 +15,22 @@ return new class extends Migration
         // 2. Tabel untuk Tamu Reguler (dengan kolom uang)
         Schema::create('guests', function (Blueprint $table) {
             $table->id();
+            // Tambahkan kolom identitas buku (agar data tidak masuk ke buku lama)
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->tinyInteger('month');
+            $table->smallInteger('year');
+
             $table->string('nomor_kamar', 20)->nullable();
             $table->string('nama_tamu');
             $table->string('tanggal_checkin', 20)->nullable();
             $table->string('tanggal_checkout', 20)->nullable();
-            $table->bigInteger('total_bayar')->default(0); // KHUSUS REGULER
+            $table->bigInteger('total_bayar')->default(0);
+            
+            // KOLOM YANG HILANG (Penyebab Error):
+            $table->string('shift_admin')->nullable(); 
+            $table->string('tanggal_input')->nullable();
+            $table->enum('status', ['checkin', 'checkout'])->default('checkin');
+
             $table->string('alamat')->nullable();
             $table->string('nik', 20)->nullable();
             $table->text('keterangan')->nullable();
@@ -27,13 +38,25 @@ return new class extends Migration
         });
 
         // Tabel untuk Tamu Aplikasi/OTA (Tanpa Kolom Uang)
-        Schema::create('app_guests', function (Blueprint $table) {
+       Schema::create('app_guests', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->tinyInteger('month');
+            $table->smallInteger('year');
+            
             $table->string('nomor_kamar', 20)->nullable();
             $table->string('nama_tamu');
-            $table->string('platform')->nullable();
             $table->string('tanggal_checkin', 20)->nullable();
             $table->string('tanggal_checkout', 20)->nullable();
+            
+            // TAMBAHKAN DUA KOLOM INI:
+            $table->string('prepaid')->nullable(); 
+            $table->string('pah')->nullable();
+            
+            $table->string('shift_admin')->nullable(); 
+            $table->string('tanggal_input')->nullable();
+            $table->enum('status', ['checkin', 'checkout'])->default('checkin');
+            
             $table->string('alamat')->nullable();
             $table->string('nik', 20)->nullable();
             $table->text('keterangan')->nullable();

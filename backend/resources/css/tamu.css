@@ -1,0 +1,66 @@
+/* Buat header fixed di atas */
+.pg {
+    padding-top: 110px; /* Beri jarak agar konten tidak tertutup header yang fixed */
+}
+
+.tabs {
+    position: fixed;
+    top: 64px; /* Sesuaikan dengan tinggi Navbar AuthenticatedLayout kamu */
+    left: 0;
+    right: 0;
+    z-index: 101;
+}
+
+.shift-header {
+    position: fixed;
+    top: 115px; /* Di bawah tabs */
+    left: 0;
+    right: 0;
+    z-index: 100;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Tombol Floating Action Button (FAB) */
+.btn-floating {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #111827;
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: transform 0.2s, background 0.2s;
+    z-index: 999;
+}
+
+.btn-floating:hover {
+    transform: scale(1.1);
+    background: #1f2937;
+}
+
+/* Tooltip simpel saat hover */
+.btn-floating::after {
+    content: "Tambah Baris";
+    position: absolute;
+    right: 70px;
+    background: #374151;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.btn-floating:hover::after {
+    opacity: 1;
+}

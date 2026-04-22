@@ -6,6 +6,7 @@ use App\Http\Controllers\AppGuestController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardKeuanganController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\PengeluaranController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,8 +23,11 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/dashboard/create-file', [DashboardController::class, 'createFile'])->name('dashboard.createFile');
+    Route::get('/dashboard',                              [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/dashboard/create-file',                 [DashboardController::class, 'createFile'])->name('dashboard.createFile');
+    Route::patch('/dashboard/update-file/{pembukuan}',    [DashboardController::class, 'updateFile'])->name('dashboard.updateFile');
+    Route::delete('/dashboard/delete-file',               [DashboardController::class, 'deleteFile'])->name('dashboard.deleteFile');
+
     Route::get('/dashboardkeuangan', [DashboardKeuanganController::class, 'index'])->name('dashboardkeuangan');
 
     // Checkin Reguler
@@ -39,6 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/app-guest/{appGuest}/status',     [AppGuestController::class, 'updateStatus'])->name('app-guest.status');
     Route::patch('/app-guest/{appGuest}',            [AppGuestController::class, 'update'])->name('app-guest.update');
     Route::delete('/app-guest/{appGuest}',           [AppGuestController::class, 'destroy'])->name('app-guest.destroy');
+
+    // Pengeluaran
+    Route::post('/pengeluaran', [PengeluaranController::class, 'store'])->name('pengeluaran.store');
 
     // Audit Log
     Route::get('/audit',        [AuditLogController::class, 'index'])->name('audit.index');

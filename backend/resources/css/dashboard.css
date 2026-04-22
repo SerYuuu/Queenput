@@ -1,0 +1,47 @@
+/* resources/css/dashboard.css */
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap');
+
+.dash { padding: 24px 20px; font-family: 'Google Sans', sans-serif; }
+.dash-header { margin-bottom: 24px; }
+.dash-title { font-size: 22px; font-weight: 600; color: #202124; letter-spacing: -.3px; }
+.dash-sub { font-size: 13px; color: #80868b; margin-top: 2px; }
+
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+@media (max-width: 900px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+
+.card {
+    background: #fff; border-radius: 12px;
+    padding: 18px 20px; border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    transition: box-shadow .2s, transform .2s;
+}
+.card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); transform: translateY(-1px); }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+}
+.card-label { font-size: 12px; font-weight: 500; color: #80868b; letter-spacing: .2px; }
+.card-value {
+    font-size: 24px; font-weight: 700; color: #202124;
+    font-family: 'Roboto Mono', monospace;
+    letter-spacing: -1px; line-height: 1.1; margin-bottom: 6px;
+}
+.card-sub { font-size: 12px; color: #80868b; }
+
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+@media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+
+.chart-card {
+    background: #fff; border-radius: 12px;
+    padding: 20px; border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.chart-title { font-size: 14px; font-weight: 600; color: #202124; margin-bottom: 4px; }
+.chart-sub { font-size: 12px; color: #80868b; margin-bottom: 16px; }
+
+.compare-row { display: flex; gap: 14px; }
+.compare-box { flex: 1; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.compare-label { font-size: 11px; font-weight: 600; color: #80868b; text-transform: uppercase; letter-spacing: .5px; }
+.compare-val { font-size: 20px; font-weight: 700; font-family: 'Roboto Mono', monospace; }
+.compare-period { font-size: 11px; color: #9aa0a6; display: flex; align-items: center; gap: 5px; }

@@ -1,19 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 
 export default function AuthenticatedLayout({ user, children }) {
     const { url } = usePage();
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     const isOwner = user?.role === 'owner';
 
     const navLinks = [
-        { href: route('dashboard'),     label: 'Beranda',  icon: '🏠' },
-        { href: route('dashboardkeuangan'),       label: 'Keuangan',        icon: '💵' },
+        { href: route('dashboard'), label: 'Beranda', icon: '🏠' },
+        { href: route('dashboardkeuangan'), label: 'Keuangan', icon: '💵'},
         ...(isOwner ? [{ href: route('audit.index'), label: 'Audit Log', icon: '🔐' }] : []),
     ];
 
-    const isActive = (href) => url.startsWith(new URL(href).pathname);
+    // PERBAIKAN 1: Logika Active Link yang lebih aman
+    const isActive = (href) => {
+    try {
+        const path = new URL(href).pathname;
+        // Jika link adalah beranda/dashboard utama, gunakan perbandingan persis (exact match)
+        if (path === '/dashboard') {
+            return url === path;
+        }
+        // Untuk menu lain, gunakan startsWith agar sub-menu tetap terhitung aktif
+        return url.startsWith(path);
+    } catch (e) {
+        return false;
+    }
+};
+
+    // PERBAIKAN 2: Klik di luar untuk menutup dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return (
         <div style={{ minHeight: '100vh', background: '#f8f9fa', fontFamily: "'Google Sans', 'Segoe UI', sans-serif" }}>
@@ -29,7 +54,7 @@ export default function AuthenticatedLayout({ user, children }) {
                 .nav-inner {
                     max-width: 1400px; margin: 0 auto;
                     padding: 0 20px;
-                    display: flex; align-items: center; gap: 0;
+                    display: flex; align-items: center;
                     height: 56px;
                 }
                 .nav-logo {
@@ -46,7 +71,7 @@ export default function AuthenticatedLayout({ user, children }) {
                 }
                 .nav-logo-text {
                     font-size: 15px; font-weight: 600;
-                    color: #202124; letter-spacing: -.3px;W
+                    color: #202124; letter-spacing: -.3px;
                 }
                 .nav-links {
                     display: flex; align-items: center; gap: 2px;
@@ -105,7 +130,7 @@ export default function AuthenticatedLayout({ user, children }) {
                     position: absolute; right: 0; top: calc(100% + 8px);
                     background: #fff; border: 1px solid #e0e0e0;
                     border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12);
-                    min-width: 180px; overflow: hidden;
+                    min-width: 200px; overflow: hidden;
                     animation: dropIn .12s ease;
                 }
                 @keyframes dropIn {
@@ -113,10 +138,11 @@ export default function AuthenticatedLayout({ user, children }) {
                     to   { opacity: 1; transform: translateY(0); }
                 }
                 .nav-dropdown-header {
-                    padding: 12px 16px 8px;
+                    padding: 12px 16px;
                     border-bottom: 1px solid #f1f3f4;
+                    background: #fafafa;
                 }
-                .nav-dropdown-name { font-size: 13px; font-weight: 600; color: #202124; }
+                .nav-dropdown-name { font-size: 13px; font-weight: 600; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
                 .nav-dropdown-email { font-size: 11px; color: #80868b; margin-top: 1px; }
                 .nav-dropdown-item {
                     display: block; width: 100%;
@@ -127,47 +153,46 @@ export default function AuthenticatedLayout({ user, children }) {
                     transition: background .1s;
                 }
                 .nav-dropdown-item:hover { background: #f1f3f4; }
-                .nav-dropdown-item.danger { color: #d93025; }
+                .nav-dropdown-item.danger { color: #d93025; border-top: 1px solid #f1f3f4; }
                 .nav-dropdown-item.danger:hover { background: #fce8e6; }
 
                 .page-content {
                     max-width: 1400px; margin: 0 auto;
+                    padding: 24px 20px;
                 }
             `}</style>
 
-            {/* Navbar */}
             <nav className="nav-root">
                 <div className="nav-inner">
-                    {/* Logo */}
-                    <a href={route('dashboardkeuangan')} className="nav-logo">
+                    {/* PERBAIKAN 3: Gunakan <Link> untuk SPA Navigation, bukan <a> */}
+                    <Link href={route('dashboard')} className="nav-logo">
                         <div className="nav-logo-icon">Q</div>
                         <span className="nav-logo-text">Queenput</span>
-                    </a>
+                    </Link>
 
-                    {/* Nav links */}
                     <div className="nav-links">
                         {navLinks.map(link => (
-                            <a
+                            <Link
                                 key={link.href}
                                 href={link.href}
                                 className={`nav-link ${isActive(link.href) ? 'active' : ''}`}
                             >
                                 <span className="nav-link-icon">{link.icon}</span>
                                 {link.label}
-                            </a>
+                            </Link>
                         ))}
                     </div>
 
-                    {/* User dropdown */}
-                    <div className="nav-user">
+                    <div className="nav-user" ref={dropdownRef}>
                         <button
                             className="nav-user-btn"
-                            onClick={() => setDropdownOpen(o => !o)}
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                            aria-expanded={dropdownOpen}
                         >
                             <div className="nav-avatar">
                                 {user?.name?.charAt(0).toUpperCase()}
                             </div>
-                            <span>{user?.name}</span>
+                            <span>{user?.name?.split(' ')[0]}</span>
                             <span className="nav-role-badge">{user?.role ?? 'admin'}</span>
                             <span style={{ fontSize: 10, color: '#80868b' }}>▾</span>
                         </button>
@@ -186,6 +211,7 @@ export default function AuthenticatedLayout({ user, children }) {
                                     method="post"
                                     as="button"
                                     className="nav-dropdown-item danger"
+                                    onClick={() => setDropdownOpen(false)}
                                 >
                                     🚪 &nbsp;Logout
                                 </Link>
@@ -195,7 +221,6 @@ export default function AuthenticatedLayout({ user, children }) {
                 </div>
             </nav>
 
-            {/* Page content */}
             <main className="page-content">
                 {children}
             </main>
