@@ -26,15 +26,25 @@ export default function ExpenseRow({ g, onFieldChange, onSave, query }) {
                 </td>
             ))}
 
-            <td className="td" style={{ textAlign: 'center' }}>
-                {!isSaved && (
-                    <ActionButton
-                        label="SIMPAN"
-                        onClick={() => onSave(g)}
-                        disabled={!canSave}
-                        color={canSave ? '#16a34a' : '#9ca3af'}
-                    />
-                )}
+            <td className="td td-aksi">
+                <div className="aksi-wrap">
+                    {!isSaved ? (
+                        <ActionButton
+                            label="SIMPAN"
+                            onClick={() => onSave(g)}
+                            disabled={!canSave}
+                            color={canSave ? '#16a34a' : '#9ca3af'}
+                        />
+                    ) : (
+                        <button
+                            className="btn-delete"
+                            onClick={() => onDelete(g)}
+                            title="Hapus data"
+                        >
+                            🗑
+                        </button>
+                    )}
+                </div>
             </td>
         </tr>
     );

@@ -60,8 +60,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // ── Dashboard Keuangan (owner only) ───────────────────────────────────────
-    Route::middleware(['role:owner', 'throttle:keuangan'])->group(function () {
-        Route::get('/dashboardkeuangan', [DashboardKeuanganController::class, 'index'])->name('dashboardkeuangan');
+    Route::middleware(['role:owner,admin', 'throttle:keuangan'])->group(function () {
+        Route::get('/Keuangan', [DashboardKeuanganController::class, 'index'])->name('dashboardkeuangan');
     });
 
 

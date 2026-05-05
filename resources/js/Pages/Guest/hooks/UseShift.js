@@ -1,32 +1,53 @@
-import { useState } from 'react';
-
-const DEFAULT_SHIFT_INPUT = {
-    name:    '',
-    date:    new Date().toISOString().split('T')[0],
-    session: 'Pagi',
-};
+import { useState, useEffect } from 'react';
 
 const STORAGE_KEY = 'active_shift';
 
-export function useShift() {
-    const [shiftInp, setShiftInp] = useState(DEFAULT_SHIFT_INPUT);
-
-    // Baca dari localStorage saat pertama load
-    const [shiftActive,     setShiftActive]     = useState(() => !!localStorage.getItem(STORAGE_KEY));
-    const [activeShiftInfo, setActiveShiftInfo] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : null;
+// Tambahkan parameter currentUser agar hook tahu siapa yang sedang login
+export function useShift(currentUser) { 
+    const [shiftInp, setShiftInp] = useState({
+        name: '',
+        date: new Date().toISOString().split('T')[0],
+        session: 'Pagi',
     });
 
-    const handleInputChange = (field, value) =>
-        setShiftInp(prev => ({ ...prev, [field]: value }));
+    // Validasi data di localStorage berdasarkan user aktif
+    const getActiveData = () => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return null;
 
+    const parsed = JSON.parse(saved);
+
+    if (!currentUser) return parsed; // ⬅️ FIX penting
+
+    if (currentUser.role === 'owner' || parsed.userId === currentUser.id) {
+            return parsed;
+        }
+
+        return null;
+    };
+
+
+    const [activeShiftInfo, setActiveShiftInfo] = useState(getActiveData);
+    const [shiftActive, setShiftActive] = useState(() => !!getActiveData());
+
+    // Di dalam file UseShift.js
     const startShift = () => {
-        if (!shiftInp.name) return;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(shiftInp));
-        setActiveShiftInfo({ ...shiftInp });
+        if (!shiftInp.name || !currentUser?.id) {
+            alert("User belum siap / belum login");
+            return;
+        }
+
+        const dataToSave = { 
+            ...shiftInp, 
+            userId: currentUser.id, // ⬅️ jangan pakai optional lagi
+            startTime: new Date().toISOString() 
+        };
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        setActiveShiftInfo(dataToSave);
         setShiftActive(true);
     };
+
 
     const endShift = (onEnd) => {
         localStorage.removeItem(STORAGE_KEY);
@@ -35,5 +56,5 @@ export function useShift() {
         onEnd?.();
     };
 
-    return { shiftActive, activeShiftInfo, shiftInp, handleInputChange, startShift, endShift };
+    return { shiftActive, activeShiftInfo, shiftInp, handleInputChange: (field, value) => setShiftInp(p => ({...p, [field]: value})), startShift, endShift };
 }

@@ -25,6 +25,7 @@ class AppGuestFactory extends Factory
         'nama_tamu' => fake()->name(),
         'tanggal_checkin' => '15:00',
         'tanggal_checkout' => '12:00',
+        'platform'    => $this->faker->randomElement(['Agoda', 'RedDoorz', 'Traveloka', 'Other']),
         'prepaid' => fake()->randomElement([180000, 220000]),
         'pah' => 0,
         'alamat' => fake()->city(),

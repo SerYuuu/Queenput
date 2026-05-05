@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Gunakan updateOrCreate agar jika email sudah ada, data hanya diupdate, bukan buat baru (menghindari error duplicate)
+        // 1. Buat atau update user admin/owner
         $owner = User::updateOrCreate(
             ['email' => 'owner@queenput.com'],
             [
@@ -31,16 +31,19 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Membuat 50 Guest Reguler dan hubungkan ke ID Admin
-        Guest::factory(50)->create([
-            'user_id' => $admin->id
-        ]);
+        // 2. Gunakan withoutEvents agar Observer Audit Log tidak memicu error Integrity Constraint
+        Guest::withoutEvents(function () use ($admin) {
+            Guest::factory(50)->create([
+                'user_id' => $admin->id
+            ]);
+        });
 
-        // Membuat 50 Guest OTA/Aplikasi dan hubungkan ke ID Admin
-        AppGuest::factory(50)->create([
-            'user_id' => $admin->id
-        ]);
+        AppGuest::withoutEvents(function () use ($admin) {
+            AppGuest::factory(50)->create([
+                'user_id' => $admin->id
+            ]);
+        });
         
-        $this->command->info('Berhasil membuat user dan 100 data dummy!');
+        $this->command->info('Berhasil membuat user dan 100 data dummy tanpa error audit!');
     }
 }

@@ -22,6 +22,7 @@
         "vite": "^7.0.0"
     },
     "dependencies": {
-        "@tanstack/react-virtual": "^3.13.24"
+        "@tanstack/react-virtual": "^3.13.24",
+        "recharts": "^3.8.1"
     }
 }

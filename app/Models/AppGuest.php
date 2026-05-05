@@ -18,7 +18,7 @@ class AppGuest extends Model
         'tanggal_checkin', 'tanggal_checkout',
         'prepaid', 'pah', 'alamat', 'nik', 'keterangan',
         'shift_admin', 'tanggal_input', 'status',
-        'created_at', 'updated_at', // ← tambahkan ini
+        'created_at', 'updated_at','platform' // ← tambahkan ini
     ];
 
     

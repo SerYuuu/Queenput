@@ -22,7 +22,7 @@ class PengeluaranController extends Controller
         Pengeluaran::create([
             'user_id'       => auth()->id(),
             'nama_barang'   => $validated['nama_barang'],
-            'harga'         => (string) $validated['harga'],
+            'harga'         => (int) $validated['harga'],
             'keterangan'    => $validated['keterangan'],
             'shift_admin'   => $validated['shift_admin'],
             'tanggal_input' => $validated['tanggal_input'],

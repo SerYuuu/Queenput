@@ -1,17 +1,43 @@
 import { SHIFT_SESSIONS } from '../../../Constants/options';
+import { usePage } from '@inertiajs/react';
 
-export default function ShiftBar({ shiftActive, shiftInp, activeShiftInfo, onInputChange, onStart, onLogout }) {
+// 1. KOMPONEN UTAMA (Harus Default Export)
+export default function ShiftBar({ 
+    shiftActive, 
+    shiftInp, 
+    activeShiftInfo, 
+    onInputChange, 
+    onStart, 
+    onLogout, 
+    onEndShift 
+}) {
+    // Hooks harus dipanggil di sini, di dalam fungsi komponen
+    const { auth } = usePage().props;
+    const user = auth.user;
+
+    // Logika untuk membedakan Admin (pemilik shift) dan Owner (pantauan)
+    const canControl = activeShiftInfo?.userId === user.id;
+    const isOwner = user.role === 'owner';
+
     return (
         <div className="shift-header">
             {!shiftActive ? (
-                <ShiftForm shiftInp={shiftInp} onInputChange={onInputChange} onStart={onStart} />
+                // Hanya tampilkan form jika bukan owner
+                !isOwner && <ShiftForm shiftInp={shiftInp} onInputChange={onInputChange} onStart={onStart} />
             ) : (
-                <ShiftInfo activeShiftInfo={activeShiftInfo} onLogout={onLogout} />
+                <ShiftInfo 
+                    activeShiftInfo={activeShiftInfo} 
+                    onLogout={onLogout} 
+                    canControl={canControl} 
+                    isOwner={isOwner}
+                    onEndShift={onEndShift}
+                />
             )}
         </div>
     );
 }
 
+// 2. KOMPONEN PENDUKUNG: SHIFTFORM (Definisikan di luar komponen utama)
 function ShiftForm({ shiftInp, onInputChange, onStart }) {
     return (
         <>
@@ -42,36 +68,45 @@ function ShiftForm({ shiftInp, onInputChange, onStart }) {
                     onChange={e => onInputChange('date', e.target.value)}
                 />
             </div>
-            <button
-                onClick={onStart}
-                style={{
+            <button onClick={onStart} className="btn-start-shift"
+            style={{
                     flex: '1', background: '#2563eb', color: 'white',
                     padding: '10px', borderRadius: '6px', border: 'none',
                     fontWeight: 'bold', cursor: 'pointer',
-                }}
-            >
+                }}>
+                
                 MULAI SHIFT
             </button>
         </>
     );
 }
 
-function ShiftInfo({ activeShiftInfo, onLogout }) {
+// 3. KOMPONEN PENDUKUNG: SHIFTINFO
+// ShiftBar.jsx
+function ShiftInfo({ activeShiftInfo, canControl, isOwner, onEndShift }) {
     return (
-        <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
+        <div style={{ display: 'flex', width: '100%', justifyBetween: 'center', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+                {isOwner && <span style={{ color: '#2563eb', fontWeight: 'bold' }}>[PANTUAN] </span>}
                 <strong>{activeShiftInfo.session} - {activeShiftInfo.name}</strong>{' '}
-                <small>({activeShiftInfo.date})</small>
+                <small style={{ opacity: 0.7 }}>({activeShiftInfo.date})</small>
             </div>
-            <button
-                onClick={onLogout}
-                style={{
-                    background: '#dc2626', color: 'white', padding: '8px 12px',
-                    borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',
-                }}
-            >
-                LOG OUT
-            </button>
+            
+            <div>
+                {/* Tombol Akhiri Shift hanya muncul jika user adalah pemilik shift tersebut */}
+                {canControl && (
+                    <button
+                        onClick={() => onEndShift()} // Memanggil endShift() dari props
+                        style={{
+                            background: '#fbbf24', color: 'black', padding: '6px 12px',
+                            borderRadius: '4px', border: 'none', cursor: 'pointer', 
+                            fontWeight: 'bold', fontSize: '12px'
+                        }}
+                    >
+                        AKHIRI SHIFT
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

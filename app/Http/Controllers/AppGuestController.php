@@ -35,11 +35,10 @@ class AppGuestController extends Controller
             'tanggal_input'    => 'required|string',
             'prepaid'          => 'nullable|string|max:255',
             'pah'              => 'nullable|string|max:255',
-        ]);
+            'platform'         => 'required|in:Agoda,RedDoorz,Traveloka,Other',  
+            ]);
 
-        // FIX: Ganti DB::table()->insert() → Eloquent::create()
-        // withoutTimestamps() agar created_at custom (tanggal buku) tidak di-override,
-        // tapi Eloquent event tetap terpanggil → AuditObserver::created() jalan ✅
+        
         $date = \Carbon\Carbon::create(
             (int) $validated['year'],
             (int) $validated['month'],
@@ -62,6 +61,7 @@ class AppGuestController extends Controller
                 'tanggal_input'    => $validated['tanggal_input'],
                 'prepaid'          => $validated['prepaid'],
                 'pah'              => $validated['pah'],
+                'platform'         => $validated['platform'],
                 'status'           => 'checkin',
                 'created_at'       => $date,
                 'updated_at'       => $date,
@@ -101,6 +101,7 @@ class AppGuestController extends Controller
             'keterangan'       => 'nullable|string',
             'prepaid'          => 'nullable|string|max:255',
             'pah'              => 'nullable|string|max:255',
+            'platform'         => 'nullable|in:Agoda,RedDoorz,Traveloka,Other',
         ]);
 
         $appGuest->update($validated);

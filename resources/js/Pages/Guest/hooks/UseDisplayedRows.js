@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-const GUEST_SEARCH_KEYS   = ['nomor_kamar', 'nama_tamu', 'tanggal_checkin', 'tanggal_checkout', 'total_bayar', 'alamat', 'nik', 'keterangan', 'shift_admin', 'tanggal_input'];
+const GUEST_SEARCH_KEYS   = ['nomor_kamar', 'nama_tamu', 'tanggal_checkin', 'tanggal_checkout', 'total_bayar', 'alamat', 'nik', 'keterangan', 'shift_admin', 'tanggal_input', 'prepaid', 'pah', 'platform'];
 const EXPENSE_SEARCH_KEYS = ['nama_barang', 'harga', 'keterangan', 'shift_admin', 'tanggal_input'];
 
 function matchesQuery(row, query, tab) {

@@ -6,7 +6,6 @@ use App\Models\Guest;
 use App\Models\AppGuest;
 use App\Models\Pengeluaran;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class GuestController extends Controller

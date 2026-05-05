@@ -24,16 +24,19 @@ function SearchBar({ query, onChange, resultCount }) {
             <input
                 className="search-inp"
                 type="text"
-                placeholder="Cari nama tamu, nomor kamar, tanggal, keterangan..."
+                placeholder="Cari nama tamu, nomor kamar, atau keterangan..."
                 value={query}
                 onChange={e => onChange(e.target.value)}
                 autoComplete="off"
             />
+            
             {query && (
-                <>
+                <div className="search-meta">
                     <span className="search-count">{resultCount} hasil</span>
-                    <button className="search-clear" onClick={() => onChange('')} title="Hapus pencarian">✕</button>
-                </>
+                    <button className="search-clear" onClick={() => onChange('')} title="Hapus">
+                        ✕
+                    </button>
+                </div>
             )}
         </div>
     );
@@ -46,7 +49,7 @@ export default function Index({ auth, guests = [], appGuests = [], expenses = []
     const [newRows, setNewRows] = useState([]);
     const [query,   setQuery]   = useState('');
 
-    const { shiftActive, activeShiftInfo, shiftInp, handleInputChange, startShift, endShift } = useShift();
+    const { shiftActive, activeShiftInfo, shiftInp, handleInputChange, startShift, endShift } = useShift(auth?.user);
     const { getVal, setEdit, clearEdit, getBuffer } = useEditBuffer();
 
     const displayedRows = useDisplayedRows(guests, appGuests, expenses, tab, newRows, activeShiftInfo, query);
@@ -89,20 +92,89 @@ export default function Index({ auth, guests = [], appGuests = [], expenses = []
         );
     };
 
-    const saveRow = (row) => {
-        if (!activeShiftInfo) return;
-        const meta = buildShiftMeta();
+    const saveRow = (id) => {
+        
+        // 1. Pastikan info shift tersedia sebelum simpan
+        if (!activeShiftInfo) {
+            alert("Shift harus aktif untuk menyimpan data!");
+            return;
+        }
+
+        // 2. Cari baris di state newRows
+        const row = newRows.find(item => item._id === id);
+        if (!row) return;
+        console.log("SHIFT:", activeShiftInfo);
+        const shiftMeta = buildShiftMeta();
+
+        // 3. Penanganan khusus tab Pengeluaran (Expense)
         if (tab === 'expense') {
             router.post(route('pengeluaran.store'), {
-                nama_barang: row.nama_barang ?? '',
-                harga:       row.harga ?? 0,
-                keterangan:  row.keterangan ?? '',
-                ...meta,
-            }, { preserveScroll: true, onSuccess: () => { removeNewRow(row._id); reloadCurrentTab(); } });
-        } else {
-            router.post(route(routeFor(tab, 'store')), { ...row, ...meta },
-                { preserveScroll: true, onSuccess: () => { removeNewRow(row._id); reloadCurrentTab(); } });
+                user_id: auth.user.id,
+                nama_barang: row.nama_barang || '',
+                harga: row.harga || 0,
+                keterangan: row.keterangan || '',
+                ...shiftMeta
+            }, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setNewRows(prev => prev.filter(item => item._id !== id));
+                    reloadCurrentTab();
+                }
+            });
+            return; 
+            // Keluar dari fungsi setelah memproses pengeluaran
         }
+
+        // 4. Penanganan untuk Guest Reguler dan OTA
+        const isOTA = tab === 'ota';
+        const routeName = isOTA ? 'app-guest.store' : 'guest.store';
+
+        const finalData = {
+            user_id: auth.user.id,
+            nomor_kamar: row.nomor_kamar ?? '',
+            nama_tamu: row.nama_tamu ?? '',
+            tanggal_checkin: row.tanggal_checkin ?? shiftMeta.tanggal_input,
+            tanggal_checkout: row.tanggal_checkout ?? '',
+            alamat: row.alamat ?? '',
+            nik: row.nik ?? '',
+            keterangan: row.keterangan ?? '',
+            // Data Khusus Reguler
+            total_bayar: row.total_bayar ?? 0,
+            // Data Khusus OTA
+            prepaid: row.prepaid ?? 0,
+            pah: row.pah ?? 0,
+            platform: row.platform ?? 'Other',
+            ...shiftMeta
+        };
+
+        router.post(route(routeName), finalData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setNewRows(prev => prev.filter(item => item._id !== id));
+                reloadCurrentTab();
+            },
+            onError: (errors) => {
+                console.error("Gagal simpan:", errors);
+                alert("Cek kembali inputan: " + Object.values(errors).join(", "));
+            }
+        });
+    };
+    
+
+    const deleteRow = (g) => {
+        if (!window.confirm(`Hapus data "${g.nama_tamu || g.nama_barang || 'ini'}"?`)) return;
+
+        const routeMap = {
+            reguler: { name: 'guest.destroy',       params: { guest: g.id }      },
+            ota:     { name: 'app-guest.destroy',    params: { appGuest: g.id }   },
+            expense: { name: 'pengeluaran.destroy',  params: { pengeluaran: g.id } },
+        };
+        const { name, params } = routeMap[tab];
+
+        router.delete(route(name, params), {
+            preserveScroll: true,
+            onSuccess: reloadCurrentTab,
+        });
     };
 
     const toggleStatus = (g) => {
@@ -133,13 +205,14 @@ export default function Index({ auth, guests = [], appGuests = [], expenses = []
                     ))}
                 </div>
 
+
                 <ShiftBar
                     shiftActive={shiftActive}
                     shiftInp={shiftInp}
                     activeShiftInfo={activeShiftInfo}
                     onInputChange={handleInputChange}
                     onStart={startShift}
-                    onLogout={() => endShift(() => { setNewRows([]); setQuery(''); })}
+                    onEndShift={() => endShift()} // Ini akan menghapus localStorage saat tugas selesai
                 />
 
                 <div className="flex items-center justify-between mb-2">
@@ -155,6 +228,7 @@ export default function Index({ auth, guests = [], appGuests = [], expenses = []
                     onBlur={handleBlur}
                     onSave={saveRow}
                     onToggleStatus={toggleStatus}
+                    onDelete={deleteRow}
                     query={query}
                 />
             </div>

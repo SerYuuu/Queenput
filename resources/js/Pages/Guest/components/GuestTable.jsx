@@ -33,8 +33,10 @@ const TableHead = memo(function TableHead({ tab }) {
                             <th className="th" style={{ width: 130 }}>Harga</th>
                         ) : (
                             <>
+                                <th className="th" style={{ width: 120 }}>Platform</th>
                                 <th className="th" style={{ width: 100 }}>Prepaid</th>
                                 <th className="th" style={{ width: 100 }}>PAH</th>
+                                
                             </>
                         )}
                         {GUEST_TAIL_COLS.map(c => (
@@ -48,7 +50,7 @@ const TableHead = memo(function TableHead({ tab }) {
     );
 });
 
-export default function GuestTable({ tab, displayedRows, getVal, onEdit, onNewRowChange, onBlur, onSave, onToggleStatus, query }) {
+export default function GuestTable({ tab, displayedRows, getVal, onEdit, onNewRowChange, onBlur, onSave, onToggleStatus, onDelete, query }) {
     const scrollRef    = useRef(null);
     const prevCountRef = useRef(displayedRows.length);
 
@@ -106,6 +108,7 @@ export default function GuestTable({ tab, displayedRows, getVal, onEdit, onNewRo
                                     g={g}
                                     onFieldChange={onNewRowChange}
                                     onSave={onSave}
+                                    onDelete={onDelete}
                                     query={query}
                                 />
                             );
@@ -121,6 +124,7 @@ export default function GuestTable({ tab, displayedRows, getVal, onEdit, onNewRo
                                 onBlur={onBlur}
                                 onSave={onSave}
                                 onToggleStatus={onToggleStatus}
+                                onDelete={onDelete}
                                 query={query}
                             />
                         );

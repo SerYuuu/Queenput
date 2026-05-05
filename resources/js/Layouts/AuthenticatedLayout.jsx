@@ -22,8 +22,7 @@ export default function AuthenticatedLayout({ user, children }) {
     const isActive = (href) => {
         try {
             const path = new URL(href).pathname;
-            if (path === '/dashboard/index') return url === path;
-            return url.startsWith(path);
+            return url === path || url.startsWith(path + '/');
         } catch (e) {
             return false;
         }
